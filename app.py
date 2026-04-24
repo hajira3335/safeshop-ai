@@ -17,6 +17,13 @@ product_db = {
     "lays chips": {"min_price": 10, "max_price": 20, "keywords": ["chips", "snack", "potato", "lays"]},
     "bisleri water": {"min_price": 15, "max_price": 25, "keywords": ["water", "mineral", "bottle", "bisleri"]},
     "coca cola": {"min_price": 20, "max_price": 40, "keywords": ["cola", "drink", "soda", "cold drink"]},
+    "maggi noodles": {"min_price": 12, "max_price": 25, "keywords": ["noodles", "maggi", "instant", "masala"]},
+    "parle g biscuit": {"min_price": 5, "max_price": 15, "keywords": ["biscuit", "parle", "glucose", "cookie"]},
+    "dettol soap": {"min_price": 30, "max_price": 60, "keywords": ["soap", "dettol", "antiseptic", "germ"]},
+    "colgate toothpaste": {"min_price": 40, "max_price": 100, "keywords": ["toothpaste", "colgate", "dental", "mint"]},
+    "amul butter": {"min_price": 50, "max_price": 60, "keywords": ["butter", "amul", "dairy", "milk"]},
+    "lifebuoy soap": {"min_price": 25, "max_price": 50, "keywords": ["soap", "lifebuoy", "germ", "hygiene"]},
+    "tata salt": {"min_price": 20, "max_price": 30, "keywords": ["salt", "tata", "iodized", "sodium"]},
 }
 
 st.title("🛡️ SafeShop AI")
@@ -57,10 +64,6 @@ if st.button("🔍 Check Authenticity"):
                 reasons.append("⚠️ Price is slightly below expected range")
             else:
                 price_score = 100
-        else:
-            price_score = 80
-
-        if product_key in product_db:
             keywords = product_db[product_key]["keywords"]
             desc_lower = description.lower()
             matches = [kw for kw in keywords if kw in desc_lower]
@@ -68,7 +71,9 @@ if st.button("🔍 Check Authenticity"):
             if keyword_score < 50:
                 reasons.append("⚠️ Description missing expected product keywords")
         else:
+            price_score = 80
             keyword_score = 80
+            st.info("ℹ️ Product not in database — using general AI analysis only.")
 
         final_score = round(
             (clip_score * 0.5) +
