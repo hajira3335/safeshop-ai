@@ -1,7 +1,6 @@
-streamlit
-transformers
-torch
-Pillow
 fastapi
 uvicorn
 python-multipart
+Pillow
+transformers
+torch --index-url https://download.pytorch.org/whl/cpu
