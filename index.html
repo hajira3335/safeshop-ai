@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SafeShop AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #fff; min-height: 100vh; }
+  .bg-glow { position: fixed; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+  nav { padding: 20px 40px; display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .logo { font-size: 22px; font-weight: 800; color: #818cf8; }
+  .logo span { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; position: relative; z-index: 1; }
+  .badge { display: inline-block; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.4); color: #818cf8; padding: 6px 16px; border-radius: 100px; font-size: 13px; font-weight: 500; margin-bottom: 20px; }
+  .hero h1 { font-size: clamp(32px, 5vw, 56px); font-weight: 800; line-height: 1.1; margin-bottom: 16px; }
+  .hero h1 span { color: #818cf8; }
+  .hero p { color: rgba(255,255,255,0.5); font-size: 16px; max-width: 500px; margin: 0 auto; }
+  .card { max-width: 680px; margin: 40px auto; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 40px; position: relative; z-index: 1; }
+  .form-group { margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  input, textarea { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; color: #fff; font-size: 15px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+  input:focus, textarea:focus { border-color: rgba(99,102,241,0.6); background: rgba(99,102,241,0.06); }
+  textarea { resize: vertical; min-height: 90px; }
+  .upload-area { border: 2px dashed rgba(255,255,255,0.12); border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+  .upload-area:hover, .upload-area.dragover { border-color: rgba(99,102,241,0.6); background: rgba(99,102,241,0.05); }
+  .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 36px; margin-bottom: 12px; }
+  .upload-text { font-size: 15px; color: rgba(255,255,255,0.5); }
+  .upload-text strong { color: #818cf8; }
+  #preview { max-width: 200px; margin: 16px auto 0; border-radius: 12px; display: none; }
+  .btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; border-radius: 14px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.1s; margin-top: 8px; }
+  .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .result { max-width: 680px; margin: 0 auto 60px; position: relative; z-index: 1; display: none; }
+  .score-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 36px 40px; }
+  .score-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+  .score-label { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+  .score-number { font-size: 56px; font-weight: 800; line-height: 1; }
+  .risk-badge { padding: 10px 20px; border-radius: 100px; font-weight: 600; font-size: 14px; }
+  .risk-low { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+  .risk-medium { background: rgba(234,179,8,0.15); color: #facc15; border: 1px solid rgba(250,204,21,0.3); }
+  .risk-high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+  .score-bar-wrap { margin-bottom: 28px; }
+  .score-bar-bg { height: 10px; background: rgba(255,255,255,0.08); border-radius: 100px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 100px; transition: width 1s cubic-bezier(0.25, 1, 0.5, 1); }
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .metric { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px; text-align: center; }
+  .metric-value { font-size: 24px; font-weight: 700; color: #818cf8; }
+  .metric-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .reasons { margin-top: 16px; }
+  .reason-item { background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.2); border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #facc15; margin-bottom: 8px; }
+  .loading { text-align: center; padding: 40px; display: none; }
+  .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #818cf8; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  footer { text-align: center; padding: 30px; color: rgba(255,255,255,0.2); font-size: 13px; position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<nav><div class="logo">🛡️ Safe<span>Shop</span> AI</div></nav>
+<div class="hero">
+  <div class="badge">🤖 Powered by OpenAI CLIP</div>
+  <h1>Detect Fake Products<br/>with <span>AI Precision</span></h1>
+  <p>Multi-factor authenticity analysis using computer vision, price intelligence, and keyword detection</p>
+</div>
+<div class="card">
+  <div class="form-group">
+    <label>Product Name</label>
+    <input type="text" id="productName" placeholder="e.g. Lays chips, Bisleri water" />
+  </div>
+  <div class="form-group">
+    <label>Product Description</label>
+    <textarea id="description" placeholder="Paste the product listing description here..."></textarea>
+  </div>
+  <div class="form-group">
+    <label>Listed Price (₹)</label>
+    <input type="number" id="price" placeholder="e.g. 10" min="1" />
+  </div>
+  <div class="form-group">
+    <label>Product Image</label>
+    <div class="upload-area" id="uploadArea">
+      <input type="file" id="imageInput" accept="image/*" />
+      <div class="upload-icon">📤</div>
+      <div class="upload-text">Drop image here or <strong>click to browse</strong></div>
+      <img id="preview" src="" alt="Preview" />
+    </div>
+  </div>
+  <button class="btn" id="analyzeBtn" onclick="analyze()">🔍 Analyze Product</button>
+</div>
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <p style="color:rgba(255,255,255,0.5)">Running AI analysis...</p>
+</div>
+<div class="result" id="result">
+  <div class="score-card">
+    <div class="score-header">
+      <div>
+        <div class="score-label">Authenticity Score</div>
+        <div class="score-number" id="scoreNum">--</div>
+      </div>
+      <div class="risk-badge" id="riskBadge">--</div>
+    </div>
+    <div class="score-bar-wrap">
+      <div class="score-bar-bg">
+        <div class="score-bar-fill" id="scoreBar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-value" id="clipScore">--</div><div class="metric-label">Vision Score</div></div>
+      <div class="metric"><div class="metric-value" id="priceScore">--</div><div class="metric-label">Price Score</div></div>
+      <div class="metric"><div class="metric-value" id="kwScore">--</div><div class="metric-label">Keyword Score</div></div>
+    </div>
+    <div class="reasons" id="reasons"></div>
+  </div>
+</div>
+<footer>SafeShop AI — College Project | Built with OpenAI CLIP + FastAPI + Vanilla JS</footer>
+<script>
+  const BACKEND_URL = "https://hajirakhan-safeshop-ai.hf.space";
+
+  document.getElementById('imageInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  const uploadArea = document.getElementById('uploadArea');
+  uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+  uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+  uploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    document.getElementById('imageInput').files = e.dataTransfer.files;
+    document.getElementById('imageInput').dispatchEvent(new Event('change'));
+  });
+
+  async function analyze() {
+    const productName = document.getElementById('productName').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const price = document.getElementById('price').value;
+    const imageFile = document.getElementById('imageInput').files[0];
+    if (!productName || !price || !imageFile) { alert('Please fill in product name, price, and upload an image.'); return; }
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true;
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('result').style.display = 'none';
+    const formData = new FormData();
+    formData.append('product_name', productName);
+    formData.append('description', description || 'no description provided');
+    formData.append('entered_price', price);
+    formData.append('image', imageFile);
+    try {
+      const response = await fetch(`${BACKEND_URL}/analyze`, { method: 'POST', body: formData });
+      const data = await response.json();
+      document.getElementById('scoreNum').textContent = data.final_score + '%';
+      document.getElementById('clipScore').textContent = data.clip_score + '%';
+      document.getElementById('priceScore').textContent = data.price_score + '%';
+      document.getElementById('kwScore').textContent = data.keyword_score.toFixed(1) + '%';
+      const bar = document.getElementById('scoreBar');
+      setTimeout(() => { bar.style.width = data.final_score + '%'; }, 100);
+      if (data.level === 'low') { bar.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)'; document.getElementById('riskBadge').className = 'risk-badge risk-low'; }
+      else if (data.level === 'medium') { bar.style.background = 'linear-gradient(90deg, #eab308, #facc15)'; document.getElementById('riskBadge').className = 'risk-badge risk-medium'; }
+      else { bar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)'; document.getElementById('riskBadge').className = 'risk-badge risk-high'; }
+      document.getElementById('riskBadge').textContent = data.risk;
+      const reasonsDiv = document.getElementById('reasons');
+      reasonsDiv.innerHTML = '';
+      if (data.reasons.length > 0) { data.reasons.forEach(r => { reasonsDiv.innerHTML += `<div class="reason-item">⚠️ ${r}</div>`; }); }
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+    } catch (err) {
+      alert('Error connecting to backend.');
+      console.error(err);
+    }
+    btn.disabled = false;
+    document.getElementById('loading').style.display = 'none';
+  }
+</script>
+</body>
+</html>
